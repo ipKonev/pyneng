@@ -16,4 +16,11 @@
 
 """
 
+from sys import argv
 ignore = ["duplex", "alias", "configuration"]
+with open(argv[1]) as f:
+    for line in f:
+        if line.startswith('!') or len((set(line.split()) & set(ignore))):
+            pass
+        else:
+            print(line.strip('\n'))

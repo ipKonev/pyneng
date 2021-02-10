@@ -23,3 +23,18 @@
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 
 """
+with open('CAM_table.txt') as f:
+    result=[]
+    for line in f:
+        line=line.strip()
+        if len(line) and line[0].isdigit():
+            vlan,mac,__,intf = line.split()
+            list1=[int(vlan),mac,intf]
+            result.append(list1)
+            #print(f'{vlan:8} {mac:16} {intf}')
+        else:
+            pass
+    result=sorted(result)
+    for each in result:
+        vlan,mac,intf=each
+        print(f'{vlan:<8} {mac:16} {intf}')
