@@ -12,3 +12,18 @@
 
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 """
+a=[int(i) for i in input('Enter ip: ').split('.')]
+
+if a[0]==a[1]==a[2]==a[3]==255:
+    print('local broadcast')
+
+elif a[0]==a[1]==a[2]==a[3]==0:
+    print('unassigned')
+
+elif a[0] not in range(1,224):
+    if a[0] in range(224,240):
+        print('multicast')
+    else:
+        print('unused')
+else:
+    print('unicast')
