@@ -25,3 +25,23 @@
 
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 """
+def  get_int_vlan_map(config_filename):
+    dict1,dict2={},{}
+    with open(config_filename) as f:
+        for line in f:
+            if line.startswith('interface'):
+                intf=line.strip().split()[1]
+            elif 'mode access' in line:
+                vlan=1
+                dict1[intf]=int(vlan)
+            elif 'access vlan' in line:
+                vlan=line.split()[-1]
+                dict1[intf]=int(vlan)
+            elif 'allowed vlan' in line:
+                vlan=line.split()[-1].split(',')
+                dict2[intf]=[int(i) for i in vlan]
+
+    
+    return dict1,dict2
+
+print(get_int_vlan_map('config_sw2.txt'))
