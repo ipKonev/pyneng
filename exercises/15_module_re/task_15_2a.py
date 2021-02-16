@@ -34,3 +34,6 @@ data = [
     ("R2", "15.2(2)T1", "Cisco 2911"),
     ("SW1", "12.2(55)SE9", "Cisco WS-C2960-8TC-L"),
 ]
+
+def  convert_to_dict(columns, values):
+    return [dict(zip(columns, i)) for i in values]

@@ -23,3 +23,20 @@
 а не ввод пользователя.
 
 """
+import re
+
+def get_ip_from_cfg(fname):
+    list1=[]
+    with open(fname) as f:
+        for line in f:
+            search=re.search('\s+ip address\s+(?P<addr>\S+)\s+(?P<mask>\S+)',line)
+            if search:
+                #print(search.groups())
+                tuple1=search.groups()
+                list1.append(tuple1)
+    return list1
+
+
+
+print(get_ip_from_cfg('config_r1.txt'))
+

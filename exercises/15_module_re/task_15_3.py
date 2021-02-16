@@ -31,4 +31,26 @@ object network LOCAL_10.1.9.5
 - перед остальными строками должен быть один пробел
 
 Во всех правилах для ASA интерфейсы будут одинаковыми (inside,outside).
+ip nat inside source static tcp 10.1.9.5 22 interface GigabitEthernet0/1 20023
 """
+import re
+
+regex=re.compile(
+    r'.* (?P<proto>tcp|upd) '
+    r'(?P<addr>[\d.]+) '
+    r'(?P<in_port>\d+) .*'
+    r' (?P<out_port>\d+)'
+)
+wr_template='''object network LOCAL_{}
+ host {}
+ nat (inside,outside) static interface service {} {} {}\n'''
+
+def convert_ios_nat_to_asa(f_read,f_write):
+    with open(f_read) as src,open(f_write,'w') as dst:
+        match=regex.findall(src.read())
+        for m in match:
+            dst.write(wr_template.format(m[1],m[1],m[0],m[2],m[3]))
+            #print(m[0])
+
+
+print(convert_ios_nat_to_asa('cisco_nat_config.txt','result.txt'))

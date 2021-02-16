@@ -19,5 +19,20 @@
 Для получения такого результата, используйте регулярные выражения.
 
 Проверить работу функции на примере файла sh_ip_int_br.txt.
-
+FastEthernet0/0            15.0.15.1       YES manual up                    up
 """
+import re
+regex=re.compile(
+    r'(?P<intf>\S+)\s+'
+    r'(?P<addr>[\d.]+|unassigned)\s+'
+    r'\w+ \w+\s+'
+    r'(?P<ls>up|down|administratively\s+down)\s+'
+    r'(?P<proto>up|down)'
+)
+def parse_sh_ip_int_br(fname):
+    with open(fname) as f:
+        match=regex.findall(f.read())
+        m=[i for i in match]
+
+    return m
+print(parse_sh_ip_int_br('sh_ip_int_br.txt'))
