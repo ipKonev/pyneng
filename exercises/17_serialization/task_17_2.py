@@ -41,11 +41,42 @@
 чтобы посмотреть содержимое списка.
 
 Кроме того, создан список заголовков (headers), который должен быть записан в CSV.
+Cisco IOS Software, 1841 Software (C1841-ADVIPSERVICESK9-M), Version 12.4(15)T1, RELEASE SOFTWARE (fc2)
+System image file is "flash:c1841-advipservicesk9-mz.124-15.T1.bin"
+ uptime is 15 days, 8 hours, 32 minutes
 """
 
-import glob
+import glob,re,csv
+
+regex=(
+        r'Cisco IOS Software.*? Version (?P<ios>\S+), '
+        r'.* uptime is (?P<uptime>.*?)\n'
+        r'.* image file is'
+        r' "(?P<image>.*)"\n'
+)
+
+
 
 sh_version_files = glob.glob("sh_vers*")
-# print(sh_version_files)
+#print(sh_version_files)
 
 headers = ["hostname", "ios", "image", "uptime"]
+
+def parse_sh_version(fstr):
+    m=re.search(regex,fstr,re.DOTALL)
+    if m:
+        return m.group('ios','image','uptime')
+
+def write_inventory_to_csv(data_filenames,csv_filename):
+    result=[headers]
+    for fname in data_filenames:
+        #list1=[fname.split('_')[-1].split('.')[0]]
+        list1=[re.search('.*_(\S+)\.',fname).group(1)]
+        a=parse_sh_version(open(fname).read())
+        list1.extend([i for i in a])
+        result.append(list1)
+    with open(csv_filename,'w',encoding='utf-8') as f:
+        writer=csv.writer(f)
+        writer.writerows(result)
+
+print(write_inventory_to_csv(sh_version_files, 'new.csv'))

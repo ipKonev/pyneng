@@ -42,4 +42,27 @@
 > И модуль python для работы с graphviz:
 > pip install graphviz
 
+R2 {'Eth 0/0': {'SW1': 'Eth 0/2'}, 'Eth 0/1': {'R5': 'Eth 0/0'}, 'Eth 0/2': {'R6': 'Eth 0/1'}}
+R4 {'Eth 0/0': {'SW1': 'Eth 0/4'}, 'Eth 0/1': {'R5': 'Eth 0/1'}}
+R6 {'Eth 0/1': {'R2': 'Eth 0/2'}}
+
 """
+import yaml
+from draw_network_graph import draw_topology
+
+def transform_topology(fname):
+    with open(fname) as f:
+        raw=yaml.safe_load(f)
+    dict1={}
+    for dev,neigh in raw.items():
+        #print(dev,neigh)
+        for l_intf,remote in neigh.items():
+            #print(l_intf,remote)
+            r_dev, r_intf = list(remote.items())[0]
+            if not (r_dev,r_intf) in dict1:
+                dict1[(dev,l_intf)] = (r_dev,r_intf)
+    return dict1
+
+if __name__ == '__main__':
+    a=transform_topology('topology.yaml')
+    draw_topology(a)
