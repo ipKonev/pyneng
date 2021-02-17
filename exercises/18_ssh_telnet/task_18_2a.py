@@ -19,3 +19,24 @@ In [15]:
 Скрипт должен отправлять список команд commands на все устройства
 из файла devices.yaml с помощью функции send_config_commands.
 """
+
+from pprint import pprint
+import yaml
+from netmiko import ConnectHandler,NetmikoTimeoutException,NetmikoAuthenticationException
+commands = ["logging 10.255.255.1", "logging buffered 20010", "no logging console"]
+
+def send_config_commands(device,config_commands,log=True):
+    try:
+        if log:
+            print('Подключаюсь к ',device['host'])
+        with ConnectHandler(**device) as ssh:
+            ssh.enable()
+            output=ssh.send_config_set(config_commands)
+        return output
+    except NetmikoAuthenticationException as error:
+        print(error)
+
+if __name__=='__main__':
+    devices=yaml.safe_load(open('devices.yaml'))
+    for device in devices:
+        result=send_config_commands(device,commands,log=False)
