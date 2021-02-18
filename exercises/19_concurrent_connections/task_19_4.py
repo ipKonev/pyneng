@@ -105,3 +105,40 @@ R3#
 
 Для выполнения задания можно создавать любые дополнительные функции.
 """
+import yaml
+from concurrent.futures import ThreadPoolExecutor
+from netmiko import ConnectHandler
+from itertools import repeat
+
+def show_operation(devices,command):
+    with ConnectHandler(**devices) as ssh:
+        ssh.enable()
+        operation=ssh.send_command(command)
+        prompt=ssh.find_prompt()
+        output=f'{prompt}{command}\n{operation}\n'
+    return output
+
+def cfg_operation(devices,command):
+    with ConnectHandler(**devices) as ssh:
+        ssh.enable()
+        operation=ssh.send_config_set(command)
+        prompt=ssh.find_prompt()
+        output=f'{prompt}{command}\n{operation}\n'
+    return operation
+
+
+def send_commands_to_devices(devices,filename,*,show=None,config=None,limit=3):
+    if show and config:
+        raise ValueError('Может быть указан только один из параметров')
+    with ThreadPoolExecutor(max_workers=limit) as executor:
+        if show:
+            result=executor.map(show_operation,devices,repeat(show))
+        elif config:
+            result=executor.map(cfg_operation,devices,repeat(config))
+    with open(filename,'w') as f:
+        for i in result:
+            f.write(i)
+
+
+a=yaml.safe_load(open('devices.yaml'))
+print(send_commands_to_devices(a,'new4.txt',show='sh ip int br'))

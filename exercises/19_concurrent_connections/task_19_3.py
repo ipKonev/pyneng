@@ -39,7 +39,9 @@ router ospf 1
 
 Проверить работу функции на устройствах из файла devices.yaml и словаре commands
 """
-
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from netmiko import ConnectHandler
+import yaml
 # Этот словарь нужен только для проверки работа кода, в нем можно менять IP-адреса
 # тест берет адреса из файла devices.yaml
 commands = {
@@ -47,3 +49,24 @@ commands = {
     "192.168.100.1": "sh ip int br",
     "192.168.100.2": "sh int desc",
 }
+def send_operation(device,command):
+    with ConnectHandler(**device) as ssh:
+        ssh.enable()
+        operation=ssh.send_command(command)
+        prompt=ssh.find_prompt()
+    return f'{prompt}{command}\n{operation}\n'
+
+def send_command_to_devices(devices,commands_dict,filename,limit=3):
+    with ThreadPoolExecutor(max_workers=limit) as executor:
+        future_list=[]
+        for device in devices:
+            addr=device['host']
+            cmd=commands_dict[device['host']]
+            future = executor.submit(send_operation,device,cmd)
+            future_list.append(future)
+    with open(filename,'w') as dst:
+        for f in as_completed(future_list):
+            dst.write(f.result())
+
+a=yaml.safe_load(open('devices.yaml'))
+print(send_command_to_devices(a,commands,'new2.txt'))

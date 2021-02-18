@@ -50,6 +50,9 @@ O        10.30.0.0/24 [110/20] via 192.168.100.1, 07:12:03, Ethernet0/0
 
 Проверить работу функции на устройствах из файла devices.yaml и словаре commands
 """
+from concurrent.futures import ThreadPoolExecutor,as_completed
+from netmiko import ConnectHandler
+import yaml
 
 # Этот словарь нужен только для проверки работа кода, в нем можно менять IP-адреса
 # тест берет адреса из файла devices.yaml
@@ -58,3 +61,27 @@ commands = {
     "192.168.100.1": ["sh ip int br", "sh int desc"],
     "192.168.100.2": ["sh int desc"],
 }
+def send_operation(device,command):
+    with ConnectHandler(**device) as ssh:
+        ssh.enable()
+        output=''
+        prompt=ssh.find_prompt()
+        for cmd in command:
+            operation=ssh.send_command(cmd)
+            output+=f'{prompt}{cmd}\n{operation}\n'
+    return output
+
+
+def send_command_to_devices(devices,commands_dict,filename,limit=3):
+    with ThreadPoolExecutor(max_workers=limit) as executor:
+        future_list=[]
+        for device in devices:
+            cmd=commands_dict[device['host']]
+            future=executor.submit(send_operation,device,cmd)
+            future_list.append(future)
+        with open(filename,'w') as dst:
+            for f in as_completed(future_list):
+                dst.write(f.result())
+
+a=yaml.safe_load(open('devices.yaml'))
+send_command_to_devices(a,commands,'new3.txt')
