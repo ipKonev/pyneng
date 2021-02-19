@@ -14,8 +14,18 @@
 и данных из файла data_files/for.yml.
 
 """
+from pprint import pprint
 import yaml
+from jinja2 import Template,Environment,FileSystemLoader
+import os
 
+def generate_config(template,data_dict):
+    folder,fname=os.path.split(template)
+    env=Environment(loader=FileSystemLoader(folder),
+                   trim_blocks=True,
+                   lstrip_blocks=True)
+    template=env.get_template(fname)
+    return template.render(data_dict)
 
 # так должен выглядеть вызов функции
 if __name__ == "__main__":
