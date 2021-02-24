@@ -32,6 +32,18 @@ Out[3]:
  ('R3', 'Eth0/2'): ('R5', 'Eth0/0')}
 
 """
+from pprint import pprint
+class Topology:
+    def __init__(self,topo):
+        list1=[]
+        for k,v in topo.items():
+            elem=[k,v]
+            relem=[v,k]
+            if relem not in list1:
+                list1.append(elem)
+            else:
+                pass
+        self.topology=dict(list1)
 
 topology_example = {
     ("R1", "Eth0/0"): ("SW1", "Eth0/1"),
@@ -44,3 +56,6 @@ topology_example = {
     ("SW1", "Eth0/2"): ("R2", "Eth0/0"),
     ("SW1", "Eth0/3"): ("R3", "Eth0/0"),
 }
+
+topolog=Topology(topology_example)
+pprint(topolog.topology)

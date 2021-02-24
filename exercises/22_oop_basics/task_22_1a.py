@@ -13,7 +13,16 @@
 class Topology:
     def __init__(self, topology_dict):
         self.topology = self._normalize(topology_dict)
-
+    def _normalize(self,topo):
+        list1=[]
+        for k,v in topo.items():
+            elem=[k,v]
+            relem=[v,k]
+            if relem not in list1:
+                list1.append(elem)
+            else:
+                pass
+        return dict(list1)
 
 topology_example = {
     ("R1", "Eth0/0"): ("SW1", "Eth0/1"),
